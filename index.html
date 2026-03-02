@@ -33,6 +33,157 @@
         .glass-highlight {
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 100%);
         }
+
+        /* Chatbot Styles */
+        #chatbot-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+
+        #chatbot-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        #chatbot-button:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        #chatbot-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 350px;
+            max-width: calc(100vw - 40px);
+            max-height: 500px;
+            display: none;
+            flex-direction: column;
+            border-radius: 24px;
+            overflow: hidden;
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        #chatbot-window.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-header {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 14px;
+            max-width: 85%;
+            line-height: 1.4;
+        }
+
+        .message-bot {
+            background: rgba(255, 255, 255, 0.2);
+            color: #000;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .quote-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin-top: 5px;
+        }
+
+        .quote-form label {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.7);
+            margin-bottom: -5px;
+        }
+
+        .quote-form input,
+        .quote-form select {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .quote-form input:focus {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .submit-btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #128C7E;
+        }
+
+        .close-chat {
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .close-chat:hover {
+            opacity: 1;
+        }
     </style>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -113,9 +264,95 @@
 
     </main>
 
+    <!-- Chatbot Widget -->
+    <div id="chatbot-widget">
+        <div id="chatbot-window" class="liquid-glass">
+            <div class="chat-header">
+                <div class="flex items-center gap-2">
+                    <div
+                        class="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center border border-white/50">
+                        <img src="assets/logo/logo.jpeg" alt="Logo" class="w-full h-full rounded-full object-cover">
+                    </div>
+                    <span>MiPecaito Bot</span>
+                </div>
+                <i data-lucide="x" class="w-5 h-5 close-chat" onclick="toggleChat()"></i>
+            </div>
+            <div class="chat-body" id="chat-messages">
+                <div class="message message-bot">
+                    Hola! Para realizar tu cotización llena el siguiente formulario para darte una atención
+                    personalizada.
+                </div>
+                <form class="quote-form" id="quote-form">
+                    <label>Nombre completo</label>
+                    <input type="text" id="name" placeholder="Tu nombre" required>
+
+                    <label>¿Para cuántas personas?</label>
+                    <input type="number" id="people" placeholder="Ej. 50" required>
+
+                    <label>Ubicación del evento</label>
+                    <input type="text" id="location" placeholder="Ciudad, colonia..." required>
+
+                    <label>¿Qué tipo de evento es?</label>
+                    <select id="event-type" required>
+                        <option value="" disabled selected>Selecciona...</option>
+                        <option value="Boda">Boda</option>
+                        <option value="Cumpleaños">Cumpleaños</option>
+                        <option value="Reunión Social">Reunión Social</option>
+                        <option value="Evento Corporativo">Evento Corporativo</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+
+                    <button type="submit" class="submit-btn shadow-lg">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        Enviar por WhatsApp
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div id="chatbot-button" class="liquid-glass" onclick="toggleChat()">
+            <i data-lucide="message-circle" class="w-8 h-8 text-black/80" id="chat-icon"></i>
+            <i data-lucide="x" class="w-8 h-8 text-black/80 hidden" id="close-icon"></i>
+        </div>
+    </div>
+
     <script>
         // Inicializar iconos de Lucide
         lucide.createIcons();
+
+        function toggleChat() {
+            const window = document.getElementById('chatbot-window');
+            const chatIcon = document.getElementById('chat-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            window.classList.toggle('active');
+            chatIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+
+            if (window.classList.contains('active')) {
+                // Smoothly scroll to bottom if needed
+                const chatBody = document.querySelector('.chat-body');
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        }
+
+        document.getElementById('quote-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const people = document.getElementById('people').value;
+            const location = document.getElementById('location').value;
+            const eventType = document.getElementById('event-type').value;
+
+            const message = `Hola! Vengo de tu web y me gustaría una cotización:%0A%0A` +
+                `*Nombre:* ${name}%0A` +
+                `*Personas:* ${people}%0A` +
+                `*Ubicación:* ${location}%0A` +
+                `*Evento:* ${eventType}`;
+
+            const whatsappUrl = `https://wa.me/525568044036?text=${message}`;
+
+            window.open(whatsappUrl, '_blank');
+        });
     </script>
 
 </body>
