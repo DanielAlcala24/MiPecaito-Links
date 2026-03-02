@@ -184,6 +184,46 @@
         .close-chat:hover {
             opacity: 1;
         }
+
+        .chat-tooltip {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 8px 16px;
+            border-radius: 18px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a1a;
+            white-space: nowrap;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+            z-index: 999;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: bottom right;
+        }
+
+        .chat-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            right: 24px;
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.7);
+            border-right: 1px solid rgba(255, 255, 255, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            transform: rotate(45deg);
+        }
+
+        .chat-tooltip.hidden {
+            opacity: 0;
+            transform: scale(0.8) translateY(10px);
+            display: none;
+        }
     </style>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -266,6 +306,9 @@
 
     <!-- Chatbot Widget -->
     <div id="chatbot-widget">
+        <div id="chat-tooltip" class="chat-tooltip">
+            Cotiza tu evento aquí ✨
+        </div>
         <div id="chatbot-window" class="liquid-glass">
             <div class="chat-header">
                 <div class="flex items-center gap-2">
@@ -323,10 +366,12 @@
             const window = document.getElementById('chatbot-window');
             const chatIcon = document.getElementById('chat-icon');
             const closeIcon = document.getElementById('close-icon');
+            const tooltip = document.getElementById('chat-tooltip');
 
             window.classList.toggle('active');
             chatIcon.classList.toggle('hidden');
             closeIcon.classList.toggle('hidden');
+            tooltip.classList.toggle('hidden');
 
             if (window.classList.contains('active')) {
                 // Smoothly scroll to bottom if needed
